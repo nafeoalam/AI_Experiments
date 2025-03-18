@@ -1,0 +1,7 @@
+transformers>=4.37.0
+torch>=2.0.0
+accelerate>=0.20.0
+sentencepiece
+einops
+openai>=1.0.0
+requests 
