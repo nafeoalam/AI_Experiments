@@ -76,6 +76,6 @@ keywords = [
     "Network",
     "Chief Medical Examiner"
   ]
-excel_path = "D:\Documents\RFx Opportunity Report-2025-04-03-13-08-50.xlsx"
+excel_path = "RFx Opportunity Report-2025-04-03-13-08-50.xlsx"
 top_match = find_relevant_rfp(keywords, excel_path)
 print("Top Matching Opportunity Name:", top_match)
