@@ -1,6 +1,7 @@
 import pandas as pd
 import openai
 import requests
+from openai import AzureOpenAI
 
 # Excel extraction
 def extract_opportunity_names(excel_path):
@@ -10,10 +11,6 @@ def extract_opportunity_names(excel_path):
     return df["Opportunity Name"].tolist()
 
 # Azure Open AI setup
-openai.api_type = "azure"
-openai.api_key = "26c38df2f0064988a4c9939d1852acfd"
-openai.api_base = "https://boh-ai.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-10-21"
-openai.api_version = "2024-10-21"
 deployment_name = "gpt-4o"
 
 def analyze_opportunities(keywords, opportunity_names):
@@ -24,7 +21,12 @@ def analyze_opportunities(keywords, opportunity_names):
     
     Identify which Opportunity Name(s) are most relevant to the keywords. Provide a summary of the matches.
     """
-    response = openai.ChatCompletion.create(
+    client = AzureOpenAI(
+        api_key="26c38df2f0064988a4c9939d1852acfd",
+        api_version="2023-05-15",
+        azure_endpoint="https://boh-ai.openai.azure.com/"
+    )
+    response = client.chat.completions.create(
         model=deployment_name,
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
@@ -33,7 +35,7 @@ def analyze_opportunities(keywords, opportunity_names):
         max_tokens=500,
         temperature=0.7
     )
-    return response.choices[0].message["content"]
+    return response.choices[0].message.content
 
 # Web search (using SerpAPI)
 def search_web(query):
