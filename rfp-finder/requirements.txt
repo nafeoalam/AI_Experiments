@@ -1,0 +1,22 @@
+# Web framework
+flask==2.3.3
+
+# Data processing
+pandas==2.1.0
+openpyxl==3.1.2  # For Excel file support with pandas
+
+# Document processing
+python-docx==1.0.1  # For Word documents
+PyPDF2==3.0.1  # For PDF files
+
+# API requests
+requests==2.31.0
+
+# Azure OpenAI
+openai==1.3.0  # Latest version with Azure support
+
+# Additional dependencies for textract
+# These might need to be installed separately depending on your system:
+# - antiword (for .doc files)
+# - poppler-utils (for .pdf files)
+# - tesseract-ocr (for image files) 
