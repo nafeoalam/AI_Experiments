@@ -6,6 +6,7 @@ import os
 import docx
 import PyPDF2
 import re
+import httpx
 
 # Flask app setup
 app = Flask(__name__)
@@ -15,6 +16,15 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+
+# Initialize Azure OpenAI client once
+client = AzureOpenAI(
+    api_key="26c38df2f0064988a4c9939d1852acfd",
+    api_version="2023-05-15",
+    azure_endpoint="https://boh-ai.openai.azure.com/",
+    http_client=httpx.Client()  # Create a new client with no proxy
+)
+deployment_name = "gpt-4o"
 
 # File content extraction
 def extract_file_content(file_path):
@@ -63,9 +73,6 @@ def extract_file_content(file_path):
     
     return content
 
-# Azure Open AI setup
-deployment_name = "gpt-4o"
-
 def analyze_file_content(keywords, file_content):
     # Process file in chunks if it's very large
     MAX_CHUNK_SIZE = 5000  # Characters per chunk
@@ -88,12 +95,6 @@ def analyze_file_content(keywords, file_content):
     
     [... Document continues for {len(file_content)} characters total]
     """
-    
-    client = AzureOpenAI(
-        api_key="26c38df2f0064988a4c9939d1852acfd",
-        api_version="2023-05-15",
-        azure_endpoint="https://boh-ai.openai.azure.com/"
-    )
     
     # Get document summary
     summary_response = client.chat.completions.create(
@@ -157,12 +158,6 @@ def process_content_chunk(keywords, content_chunk, position=0, total_length=0):
     Identify only the parts most relevant to the keywords. Focus on extracting specific information 
     rather than general observations. If nothing relevant is found in this section, state that clearly.
     """
-    
-    client = AzureOpenAI(
-        api_key="26c38df2f0064988a4c9939d1852acfd",
-        api_version="2023-05-15",
-        azure_endpoint="https://boh-ai.openai.azure.com/"
-    )
     
     response = client.chat.completions.create(
         model=deployment_name,
