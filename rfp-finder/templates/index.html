@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RFP Finder</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <!-- Add Markdown parser library -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
             padding-top: 50px;
         }
         .container {
-            max-width: 600px;
+            max-width: 800px;
         }
         .card {
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -27,6 +29,63 @@
         }
         h1 {
             color: #343a40;
+        }
+        .results-section {
+            margin-top: 40px;
+        }
+        .scrollable-content {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: white;
+        }
+        /* Markdown styling */
+        .markdown-content h1, .markdown-content h2, .markdown-content h3 {
+            margin-top: 20px;
+            color: #0056b3;
+        }
+        .markdown-content h1 {
+            font-size: 1.6rem;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        .markdown-content h2 {
+            font-size: 1.4rem;
+        }
+        .markdown-content h3 {
+            font-size: 1.2rem;
+        }
+        .markdown-content ul, .markdown-content ol {
+            padding-left: 25px;
+            margin-bottom: 15px;
+        }
+        .markdown-content li {
+            margin-bottom: 5px;
+        }
+        .markdown-content p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .markdown-content pre, .markdown-content code {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .markdown-content pre {
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .markdown-content code {
+            padding: 2px 5px;
+        }
+        .markdown-content blockquote {
+            border-left: 4px solid #007bff;
+            padding-left: 15px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        .markdown-content strong {
+            color: #495057;
         }
     </style>
 </head>
@@ -52,7 +111,38 @@
                 </div>
             </form>
         </div>
+        
+        <!-- Results Section (only shown when show_results is True) -->
+        {% if show_results %}
+        <div class="results-section">
+            <div class="card p-4">
+                <h2 class="text-center mb-4">Analysis Results</h2>
+                <div class="scrollable-content markdown-content" id="markdown-results">
+                    <!-- Markdown content will be rendered here -->
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    
+    {% if show_results %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get content from the hidden element
+            const rawMarkdown = document.getElementById('raw-markdown').textContent;
+            
+            // Parse and render the markdown
+            const htmlContent = marked.parse(rawMarkdown);
+            
+            // Insert the rendered HTML
+            document.getElementById('markdown-results').innerHTML = htmlContent;
+        });
+    </script>
+    {% endif %}
+    
+    <!-- Add this hidden element after the scrollable-content div -->
+    <div id="raw-markdown" style="display: none;">{{ analysis|safe }}</div>
 </body>
 </html>

@@ -177,19 +177,16 @@ def find_relevant_info(keywords, file_path):
     analysis = analyze_file_content(keywords, file_content)
     print("Analysis Result:\n", analysis)
     
-    # Parse the analysis for matches
-    matches = []
-    lines = analysis.split("\n")
-    for line in lines:
-        line = line.strip()
-        if line:
-            matches.append(line)
-    
-    return matches, analysis
+    # Return the full markdown text as a single item to preserve formatting
+    return [analysis], analysis
 
 # Routes
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    matches = []
+    analysis = ""
+    show_results = False
+    
     if request.method == 'POST':
         # Check if file and keywords are provided
         if 'file' not in request.files or 'keywords' not in request.form:
@@ -215,13 +212,15 @@ def upload_file():
             matches, analysis = find_relevant_info(keywords, file_path)
             # Clean up the uploaded file
             os.remove(file_path)
-            # Render the result page
-            return render_template('result.html', matches=matches, analysis=analysis)
+            # Set flag to show results
+            show_results = True
+            # Render the page with both form and results
+            return render_template('index.html', matches=matches, analysis=analysis, show_results=show_results)
         except Exception as e:
             os.remove(file_path)
             return f"An error occurred: {str(e)}", 500
     
-    return render_template('index.html')
+    return render_template('index.html', matches=matches, analysis=analysis, show_results=show_results)
 
 # Run the app
 if __name__ == '__main__':
