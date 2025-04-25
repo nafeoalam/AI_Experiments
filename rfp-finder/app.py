@@ -37,6 +37,12 @@ def extract_file_content(file_path):
             df = pd.read_excel(file_path)
             # Convert all DataFrame content to string
             content = df.to_string(index=False)
+        
+        elif file_extension == '.csv':
+            # CSV files
+            df = pd.read_csv(file_path)
+            # Convert all DataFrame content to string
+            content = df.to_string(index=False)
             
         elif file_extension == '.docx':
             # Word documents
@@ -65,7 +71,7 @@ def extract_file_content(file_path):
         
         else:
             # For unsupported file types
-            content = f"Unsupported file type: {file_extension}. Please upload an Excel, Word, PDF, or text file."
+            content = f"Unsupported file type: {file_extension}. Please upload an Excel, CSV, Word, PDF, or text file."
     
     except Exception as e:
         print(f"Error extracting content from {file_path}: {str(e)}")
@@ -125,18 +131,26 @@ def analyze_file_content(keywords, file_content):
     combined_analysis = client.chat.completions.create(
         model=deployment_name,
         messages=[
-            {"role": "system", "content": "You are a document analysis assistant that extracts key information."},
+            {"role": "system", "content": "You are a document analysis assistant that creates properly formatted tables. For CSV output, enclose any values containing commas in double quotes."},
             {"role": "user", "content": f"""
-            I have analyzed a document in chunks. Combine the following analyses into a single coherent summary.
-            Focus on the most relevant information related to these keywords: {keywords}.
+            I have analyzed a document in chunks and extracted information related to these keywords: {keywords}.
+            
+            Here are the analyses from different sections:
             
             {' '.join(full_analysis)}
             
-            Provide your final combined analysis with the most important findings first. Eliminate repetition.
-            """}
+            Combine all of this information into a single comprehensive table.
+            - Make sure address fields and text with commas are kept in a single column
+            - Include clear headers in the first row
+            - Structure the data logically
+            - Include all relevant details without breaking the table format
+            - Ensure no important information is lost
+            - Remove duplicate entries
+            """
+            }
         ],
-        max_tokens=500,
-        temperature=0.5
+        max_tokens=1500,
+        temperature=0.3
     )
     
     return combined_analysis.choices[0].message.content
@@ -155,18 +169,21 @@ def process_content_chunk(keywords, content_chunk, position=0, total_length=0):
     
     {content_chunk}
     
-    Identify only the parts most relevant to the keywords. Focus on extracting specific information 
-    rather than general observations. If nothing relevant is found in this section, state that clearly.
+    Extract all relevant information into a well-structured table format with appropriate headers.
+    For addresses, organization names, and other text with commas, place the entire text in a single column.
+    Ensure that values containing commas don't break the CSV structure.
+    Include as much detail as possible and ensure no text or data is missing.
+    If nothing relevant is found in this section, output a table with headers but indicate no data was found.
     """
     
     response = client.chat.completions.create(
         model=deployment_name,
         messages=[
-            {"role": "system", "content": "You are a precise document analysis tool. Extract only relevant information."},
+            {"role": "system", "content": "You are a precise document analysis tool. Format output as a properly escaped CSV where values with commas are enclosed in double quotes. Always use headers for each column."},
             {"role": "user", "content": prompt}
         ],
-        max_tokens=300,
-        temperature=0.5
+        max_tokens=1000,
+        temperature=0.3
     )
     
     return response.choices[0].message.content
